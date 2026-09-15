@@ -30,5 +30,8 @@ conda create -n "LlamaIndex-Introduccion" python=3.11
 ## Activamos el Entorno Virtual
 conda activate LlamaIndex-Introduccion
 
+## Instalar requerimientos
+pip install -r requirements.txt
+
 ## Instalamos las dependencias
 pip install "psycopg[binary]" asyncpg

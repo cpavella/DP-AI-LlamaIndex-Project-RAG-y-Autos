@@ -11,4 +11,4 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Comando por defecto al ejecutar el contenedor
-CMD ["python", "bot_with_memory.py"]
+CMD ["python", "bot.py"]

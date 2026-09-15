@@ -18,20 +18,42 @@ from llama_index.storage.chat_store.postgres import PostgresChatStore
 
 
 def _build_database_url() -> str:
-    """Construye la URL de conexión a PostgreSQL desde variables de entorno."""
+    """Construye la URL de conexión a PostgreSQL."""
+
     DB_USER = os.getenv("DB_USER")
     DB_PASSWORD = os.getenv("DB_PASSWORD")
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT", "5432")
     DB_NAME = os.getenv("DB_NAME", "postgres")
+    INSTANCE_UNIX_SOCKET = os.getenv("INSTANCE_UNIX_SOCKET")
 
-    if not all([DB_USER, DB_PASSWORD, DB_HOST]):
+    if not all([DB_USER, DB_PASSWORD, DB_NAME]):
         raise ValueError(
-            "❌ Faltan variables de base de datos en .env\n"
-            "Requeridas: DB_USER, DB_PASSWORD, DB_HOST"
+            "❌ Faltan variables de base de datos.\n"
+            "Requeridas: DB_USER, DB_PASSWORD, DB_NAME"
         )
 
-    return f"postgresql+asyncpg://{DB_USER}:{quote_plus(DB_PASSWORD)}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # Cloud Run + Cloud SQL
+    if INSTANCE_UNIX_SOCKET:
+        return (
+            f"postgresql+asyncpg://"
+            f"{DB_USER}:{quote_plus(DB_PASSWORD)}@/"
+            f"{DB_NAME}?host={quote_plus(INSTANCE_UNIX_SOCKET)}"
+        )
+
+    # PostgreSQL mediante host/IP
+    # Se mantiene para ejecución local o Supabase
+    if not DB_HOST:
+        raise ValueError(
+            "❌ DB_HOST no está definido y tampoco "
+            "INSTANCE_UNIX_SOCKET."
+        )
+
+    return (
+        f"postgresql+asyncpg://"
+        f"{DB_USER}:{quote_plus(DB_PASSWORD)}@"
+        f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
 
 
 def build_chat_store(table_name: str) -> PostgresChatStore:
