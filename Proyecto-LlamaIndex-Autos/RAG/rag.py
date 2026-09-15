@@ -132,6 +132,16 @@ def get_qdrant_client() -> qdrant_client.QdrantClient:
     )
 
 
+def get_async_qdrant_client() -> qdrant_client.AsyncQdrantClient:
+    """Cliente para las consultas asíncronas ejecutadas por FunctionAgent."""
+    return qdrant_client.AsyncQdrantClient(
+        url=QDRANT_URL.rstrip("/"),
+        api_key=QDRANT_API_KEY or None,
+        port=None,
+        timeout=60,
+    )
+
+
 def get_vector_store(
     client: qdrant_client.QdrantClient | None = None,
     collection_name: str = COLLECTION_NAME,
@@ -144,6 +154,7 @@ def get_vector_store(
     """
     return QdrantVectorStore(
         client=client or get_qdrant_client(),
+        aclient=get_async_qdrant_client(),
         collection_name=collection_name,
     )
 
